@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Meal Viewer</title>
+  <!-- Dodanie Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* Dodatkowe style CSS */
+    /* Ukryj menu na początku */
+    .navbar-collapse {
+      display: none;
+      position: absolute;
+      top: -100px;
+      left: 0;
+      width: 100%;
+      background-color: #333; /* Dodaj tło menu */
+      transition: top 0.3s; /* Dodaj płynną animację */
+    }
+
+    /* Po najechaniu myszką na pasek nawigacji, pokaż menu */
+    .navbar:hover .navbar-collapse {
+      display: block;
+      top: 60px; /* Przesuń menu na pozycję pod paskiem nawigacji */
+    }
+
+    /* Dostosowanie stylów dla smartfona */
+    @media (max-width: 767.98px) {
+      .navbar-collapse {
+        top: 40px; /* Przesuń menu na pozycję pod paskiem nawigacji */
+      }
+    }
+
+    /* Dostosowanie stylów dla tabletu */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+      .navbar-collapse {
+        top: 56px; /* Przesuń menu na pozycję pod paskiem nawigacji */
+      }
+    }
+
+    /* Dostosowanie stylów dla urządzeń większych niż tablet */
+    @media (min-width: 992px) {
+      /* Zmniejsz szerokość kontenera obrazu */
+      #mealContainer {
+        max-width: 50%; /* Ustaw maksymalną szerokość kontenera na 50% */
+      }
+    }
+
+    /* Dodatkowe style dla sekcji */
+    .section {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #ccc;
+    }
+
+    /* Styl dla zdjęcia */
+    #mealImage {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar z Bootstrap -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Random Meal Viewer</a>
+      <!-- Dodanie ikony zmiany trybu dzień/noc do paska nawigacji -->
+      <div id="themeSwitcher" class="d-flex">
+        <i id="dayIcon" class="icon fas fa-sun me-3"></i>
+        <i id="nightIcon" class="icon fas fa-moon"></i>
+      </div>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#ingredients">Scroll to Ingredients</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#instructions">Scroll to Instructions</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h1 class="mb-4" id="mainTitle">Random Meal Viewer</h1>
+    <button id="fetchMealBtn" class="btn btn-primary mb-4">Fetch Random Meal</button>
+
+    <div id="mealContainer">
+      <!-- Random meal will be displayed here -->
+    </div>
+
+    <div id="content" class="mt-4">
+      <!-- Dynamic content will be loaded here -->
+      
+      <!-- Sekcja Instrukcje -->
+      <div class="section" id="instructions">
+        <h2>Instructions</h2>
+        <!-- Instructions for the meal will be displayed here -->
+      </div>
+    </div>
+
+    <!-- Przycisk "Top" -->
+    <button onclick="scrollToTop()" class="btn btn-secondary">Top</button>
+  </div>
+
+  <!-- Kod JavaScript -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Dodanie Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    setTimeout(hideTitle, 5000); // 5000 milisekund = 5 sekund
+
+function hideTitle() {
+  const mainTitle = document.getElementById('mainTitle');
+  mainTitle.style.display = 'none';
+}
+    document.getElementById('fetchMealBtn').addEventListener('click', fetchRandomMeal);
+
+    async function fetchRandomMeal() {
+      try {
+        const response = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        displayMeal(data);
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    }
+
+    function displayMeal(data) {
+      const meal = data.meals[0];
+      const mealContainer = document.getElementById('mealContainer');
+      mealContainer.innerHTML = ''; // Clear previous meal
+      const mealName = document.createElement('h2');
+      mealName.textContent = meal.strMeal;
+      mealContainer.appendChild(mealName);
+      const mealImage = document.createElement('img');
+      mealImage.id = 'mealImage';
+      mealImage.src = meal.strMealThumb;
+      mealImage.alt = meal.strMeal;
+      mealContainer.appendChild(mealImage);
+      
+      // Sekcja Składniki umieszczona zaraz pod zdjęciem
+      const ingredientsSection = document.createElement('div');
+      ingredientsSection.classList.add('section');
+      ingredientsSection.id = 'ingredients';
+      const ingredientsTitle = document.createElement('h2');
+      ingredientsTitle.textContent = 'Ingredients';
+      ingredientsSection.appendChild(ingredientsTitle);
+      mealContainer.appendChild(ingredientsSection);
+
+      const ingredientsList = document.createElement('ul');
+      for (let i = 1; i <= 20; i++) {
+        const ingredient = meal['strIngredient' + i];
+        const measure = meal['strMeasure' + i];
+        if (ingredient && ingredient.trim() !== '') {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${measure ? measure.trim() : ''} ${ingredient.trim()}`;
+          ingredientsList.appendChild(listItem);
+        } else {
+          break; // No more ingredients
+        }
+      }
+      ingredientsSection.appendChild(ingredientsList);
+
+      // Sprawdzenie, czy sekcja "Instrukcje" już istnieje
+      let instructionsSection = document.getElementById('instructions');
+      if (!instructionsSection) {
+        // Jeśli nie istnieje, dodajemy sekcję "Instrukcje"
+        instructionsSection = document.createElement('div');
+        instructionsSection.classList.add('section');
+        instructionsSection.id = 'instructions';
+        const instructionsTitle = document.createElement('h2');
+        instructionsTitle.textContent = 'Instructions';
+        instructionsSection.appendChild(instructionsTitle);
+        mealContainer.appendChild(instructionsSection);
+      }
+
+      const instructions = document.createElement('p');
+      instructions.textContent = meal.strInstructions;
+      instructionsSection.appendChild(instructions);
+    }
+
+    // Funkcja zmieniająca motyw na nocny
+    function setNightTheme() {
+      $('body').css({'background-color': '#333', 'color': '#fff'});
+      $('#dayIcon').show();
+      $('#nightIcon').hide();
+    }
+
+    // Funkcja zmieniająca motyw na dzienny
+    function setDayTheme() {
+      $('body').css({'background-color': '#fff', 'color': '#333'});
+      $('#dayIcon').hide();
+      $('#nightIcon').show();
+    }
+
+    // Domyślnie ustawiamy motyw na dzienny
+    setDayTheme();
+
+    // Obsługa kliknięcia na ikonę "noc"
+    $('#nightIcon').click(function() {
+      setNightTheme();
+    });
+
+    // Obsługa kliknięcia na ikonę "dzień"
+    $('#dayIcon').click(function() {
+      setDayTheme();
+    });
+
+    // Funkcja przewijająca stronę do góry
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  </script>
+
+  <!-- Ikony -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</body>
+</html>
